@@ -1,0 +1,58 @@
+::selection {
+    background: none;
+}
+
+li {
+    cursor: pointer;
+}
+
+li:hover{
+    background-color: lightgray;
+}
+
+
+
+
+.calendar {
+    width: 50%;
+    margin-left: 25%;
+}
+
+.day {
+    display: inline-block;
+    width: 14.2857%;
+    height: 50px;
+    line-height: 50px;
+    border: 1px solid grey;
+    text-align: center;
+    cursor: pointer;
+}
+
+
+.weekDayDescription {
+    display: inline-block;
+    width: 14.2857%;
+    height: 50px;
+    line-height: 50px;
+    border: 1px solid grey;
+    text-align: center;
+    background-color: #4286f4;
+    color: white;
+}
+
+.day:hover{
+    background-color: lightgrey;
+}
+
+.selected {
+    background-color: lightgrey;
+    color: grey;
+}
+
+.weekend {
+    color: grey;
+}
+
+.other-month {
+    background-color: lightblue;
+}
