@@ -5,40 +5,94 @@
 
 <br><br>
 
+<div>
 
-
-<div class="calendar">  
-
-  <div class="controls btn-group btn-group-justified">
-    <a href="javascript:void(0)" class="btn btn-primary" (click)="goToPreviousMonth()"><<</a>
-    <a href="javascript:void(0)" class="btn btn-primary" data-toggle="modal" data-target="#datePickerModal">{{getVerboseMonth(date)}} {{currentYear}}</a>
-    <a href="javascript:void(0)" class="btn btn-primary" (click)="goToNextMonth()">>></a>
-  </div>
-
-  <br>
-
-  <div class="weekDayDescription" *ngFor="let day of ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']">
-    <p>{{day}}</p>
-  </div>  
-  
-  <div class="day other-month" *ngFor="let day of previousMonthDays">
-    <p [class.weekend]="isWeekend(day, -1)">{{day+1}}</p>
-  </div>
-
-  <div class="day" *ngFor="let day of days; let i = index;">
-    <p [class.weekend]="isWeekend(day, 0)">{{day+1}}</p>
+  <div class="col-md-3">
   </div>
   
-  <div class="day other-month" *ngFor="let day of nextMonthDays">
-    <p [class.weekend]="isWeekend(day, 1)">{{day+1}}</p>
+  <!-- Calendar stuff -->
+  <div class="col-md-6">  
+  
+    <div class="controls btn-group btn-group-justified">
+      <a href="javascript:void(0)" class="btn btn-primary" (click)="goToPreviousMonth()"><<</a>
+      <a href="javascript:void(0)" class="btn btn-primary" data-toggle="modal" data-target="#datePickerModal">{{getVerboseMonth(date)}} {{currentYear}}</a>
+      <a href="javascript:void(0)" class="btn btn-primary" (click)="goToNextMonth()">>></a>
+    </div>
+  
+    <br>
+  
+    <div class="weekDayDescription" *ngFor="let day of ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']">
+      <p>{{day}}</p>
+    </div>  
+    
+    <div class="day other-month" *ngFor="let day of previousMonthDays"
+     (click)="goToPreviousMonth()">
+      <p [class.weekend]="isWeekend(day, -1)">{{day+1}}</p>
+    </div>
+  
+    <div class="day" *ngFor="let day of days; let i = index;" 
+      [class.selected]="hasTasks(currentYear, currentMonth, day+1)" 
+      [class.today]="day+1 == today.getDate() && currentMonth == today.getMonth()"
+      (click)="effectivelySelectDay(day+1)"
+      (mouseenter)="selectDay(day+1)">
+      <p [class.weekend]="isWeekend(day, 0)">{{day+1}}</p>
+      <!-- <p [class.weekend]="isWeekend(day, 0)" [class.selected]="hasTasks(currentYear, currentMonth, day+1)" data-toggle="modal" attr.data-target="#{{currentYear}}_{{currentMonth}}_{{day+1}}_modal">{{day+1}}</p> -->
+    </div>
+    
+    <div class="day other-month" *ngFor="let day of nextMonthDays"
+     (click)="goToNextMonth()">
+      <p [class.weekend]="isWeekend(day, 1)">{{day+1}}</p>
+    </div>
+    
+    <br><br>
+  
+  </div>
+  
+  <div class="col-md-2">
+    <!-- Selected day's tasks -->
+    <div *ngIf="selectedDay">
+        <h3>{{selectedDay}} {{getVerboseMonth(selectedDate)}} {{selectedDate.getFullYear()}} <span class="label label-success">{{selectedTasks.length}}</span></h3>
+        <h4 *ngIf="!hasTasks(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDay)">There are no tasks</h4>
+        <div *ngFor="let task of selectedTasks" class="alert alert-info">
+          <h4>{{task.title}}</h4>
+          <p>{{task.description}}</p>
+        </div>
+      </div>
   </div>
 
 </div>
 
 
-<br><br><br><br><br><br>
 
-<!-- Modal -->
+
+
+
+
+
+<!-- Task Modals -->
+<div *ngFor="let task of agenda" id="{{task.date}}_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">{{task.title}}</h4>
+      </div>
+      <div class="modal-body">
+        <p>{{task.description}}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- Date selection Modal -->
 <div class="modal fade" id="datePickerModal" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -46,29 +100,38 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title text-center">Select date</h4>
       </div>
-      <div class="modal-body text-center">
-        <label for="month">Month: </label>
-        <select multiple class="form-control">
-          <option value="0" [selected]="getVerboseMonth(date)=='Jan'">Jan</option>
-          <option value="1" [selected]="getVerboseMonth(date)=='Fev'">Fev</option>
-          <option value="2" [selected]="getVerboseMonth(date)=='Mar'">Mar</option>
-          <option value="3" [selected]="getVerboseMonth(date)=='Abr'">Abr</option>
-          <option value="4" [selected]="getVerboseMonth(date)=='Mai'">Mai</option>
-          <option value="5" [selected]="getVerboseMonth(date)=='Jun'">Jun</option>
-          <option value="6" [selected]="getVerboseMonth(date)=='Jul'">Jul</option>
-          <option value="7" [selected]="getVerboseMonth(date)=='Ago'">Ago</option>
-          <option value="8" [selected]="getVerboseMonth(date)=='Set'">Set</option>
-          <option value="9" [selected]="getVerboseMonth(date)=='Out'">Out</option>
-          <option value="10" [selected]="getVerboseMonth(date)=='Nov'">Nov</option>
-          <option value="11" [selected]="getVerboseMonth(date)=='Dez'">Dez</option>
-        </select>   
-        
-        <label for="month">Year: </label>
-        <input type="number" class="form-control" value="{{currentYear}}"/>
-      </div>
-      <div class="modal-footer center-block">
-        <button type="button" class="btn btn-primary center-block" data-dismiss="modal">Select</button>
-      </div>
+      <form class="form-horizontal">
+        <div class="modal-body text-center">
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="month">Month: </label>
+            <div class="col-sm-4">
+              <select class="form-control" [(ngModel)]="formMonth" name="formMonth">
+                <option value="0" [selected]="getVerboseMonth(date)=='Jan'">Jan</option>
+                <option value="1" [selected]="getVerboseMonth(date)=='Fev'">Fev</option>
+                <option value="2" [selected]="getVerboseMonth(date)=='Mar'">Mar</option>
+                <option value="3" [selected]="getVerboseMonth(date)=='Abr'">Abr</option>
+                <option value="4" [selected]="getVerboseMonth(date)=='Mai'">Mai</option>
+                <option value="5" [selected]="getVerboseMonth(date)=='Jun'">Jun</option>
+                <option value="6" [selected]="getVerboseMonth(date)=='Jul'">Jul</option>
+                <option value="7" [selected]="getVerboseMonth(date)=='Ago'">Ago</option>
+                <option value="8" [selected]="getVerboseMonth(date)=='Set'">Set</option>
+                <option value="9" [selected]="getVerboseMonth(date)=='Out'">Out</option>
+                <option value="10" [selected]="getVerboseMonth(date)=='Nov'">Nov</option>
+                <option value="11" [selected]="getVerboseMonth(date)=='Dez'">Dez</option>
+              </select>   
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-4"  for="month">Year: </label>
+            <div class="col-sm-4">
+              <input type="number" class="form-control" [(ngModel)]="formYear" name="formYear"/>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer center-block">
+          <button type="button" class="btn btn-primary center-block" (click)="goToDate()" data-dismiss="modal">Select</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

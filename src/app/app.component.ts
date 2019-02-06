@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 
+import { CalendarService } from './calendar.service';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -9,44 +11,47 @@ import { OnInit } from '@angular/core';
 
 export class AppComponent implements OnInit {
 
-  date;
-  numberOfDays;
-  previousMonthNumberOfDays;
-  nextMonthNumberOfDays;
-  days;
-  previousMonthDays = [];
-  nextMonthDays;
-  firstWeekDay;
+  date: Date;
+  firstWeekDay: number;
+  currentMonth: number;
+  currentYear: number;
 
-  currentMonth;
-  currentYear;
+  today: Date;
+
+  numberOfDays: number;
+  previousMonthNumberOfDays: number;
+  nextMonthNumberOfDays: number;
+
+  days = [];
+  previousMonthDays = [];
+  nextMonthDays = [];
+  
+  agenda = [];
+  previousAgenda = [];
+  nextAgenda = [];
+
+  selectedDay: number;
+  selectedDate: Date = null;
+  selectedTasks = [];
+
+  formMonth: number;
+  formYear: number;
+
+
+  constructor(private calendarService: CalendarService){ }
+  
   
   ngOnInit(): void {
 
     this.date = new Date();
+    this.today = new Date();
   
-    this.numberOfDays = this.getNumberOfDays(this.date.getFullYear(), this.date.getMonth());
+    this.setVariables();
 
-    this.firstWeekDay = (new Date(this.date.getFullYear(), this.date.getMonth(), 1)).getDay();
+    this.calendarService.initAgenda();
+    this.agenda = this.calendarService.getAgenda();
 
-    // The visual rendering index of each week day is different from its index value
-    //
-    // 'Dom'(Domingo)/'Sun'(Sunday) are rendered on index 6, while its index value is 0
-    // 'Seg'(Segunda)/'Mon'(Monday) is rendered on index 0, while its index value is 1
-    // 'Ter'(Terça)/'Tue'(Tuesday) is rendered on index 1, while its index value is 2
-
-    this.previousMonthNumberOfDays = this.firstWeekDay == 0 ? 6 : this.firstWeekDay-1;
-
-    this.nextMonthNumberOfDays = 42 - this.numberOfDays - this.previousMonthNumberOfDays;
-
-    this.days = Array.apply(null, {length: this.numberOfDays}).map(Number.call, Number);
-
-    this.setPreviousMonthDays();
-
-    this.nextMonthDays = Array.apply(null, {length: this.nextMonthNumberOfDays}).map(Number.call, Number);
-
-    this.currentMonth = this.date.getMonth();
-    this.currentYear = this.date.getFullYear();
+    this.effectivelySelectDay(this.date.getDate());
 
   } 
 
@@ -67,16 +72,17 @@ export class AppComponent implements OnInit {
 
     this.nextMonthNumberOfDays = 42 - this.numberOfDays - this.previousMonthNumberOfDays;
 
-    this.days = [];
     this.days = Array.apply(null, {length: this.numberOfDays}).map(Number.call, Number);
 
     this.setPreviousMonthDays();
 
-    this.nextMonthDays = [];
     this.nextMonthDays = Array.apply(null, {length: this.nextMonthNumberOfDays}).map(Number.call, Number);
 
     this.currentMonth = this.date.getMonth();
     this.currentYear = this.date.getFullYear();
+
+    this.formMonth = this.currentMonth;
+    this.formYear = this.currentYear;
   }
 
 
@@ -93,6 +99,9 @@ export class AppComponent implements OnInit {
       this.previousMonthDays.push(i);
     }
   }
+
+
+
 
   goToPreviousMonth(): void {
     var year, month;
@@ -118,9 +127,46 @@ export class AppComponent implements OnInit {
     this.setVariables();
   }
 
-  selectCurrentDay(): void {
+  goToDate(): void {
+    let year = this.formYear;
+    let month = this.formMonth;
+
+    this.date = new Date(year, month);
+    this.setVariables();
+  }
+
+
+
+
+  selectDay(day): void {
+    if (this.hasTasks(this.currentYear, this.currentMonth, day)){
+      this.selectedDay = day;
+      this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
+      this.selectedTasks = this.calendarService.getTasks(this.currentYear, this.currentMonth, day);
+    }
+  }
+
+  effectivelySelectDay(day): void {
+    this.selectedDay = day;
+    this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
+    this.selectedTasks = this.calendarService.getTasks(this.currentYear, this.currentMonth, day);
+  }
+
+  getAgenda(): void {
 
   }
+
+  hasTasks(year, month, day): boolean {
+    for (var i in this.agenda){
+      let date = this.agenda[i].date;
+      if (date==`${year}_${month}_${day}`)
+        return true;
+    }
+    return false;
+  }
+
+
+
 
   isWeekend(day, relative): boolean{
     var year, month;

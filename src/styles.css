@@ -14,8 +14,8 @@ li:hover{
 
 
 .calendar {
-    width: 80%;
-    margin-left: 10%;
+    width: 50%;
+    margin-left: 25%;
 }
 
 .day {
@@ -44,9 +44,12 @@ li:hover{
     background-color: lightgrey;
 }
 
+.today {
+    font-weight: 600;
+}
+
 .selected {
-    background-color: lightgrey;
-    color: grey;
+    background-color: lightgreen;
 }
 
 .weekend {
